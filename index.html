@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thzffx</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- TELA CALCULADORA (LOGIN) --- */
+        #screen-calc {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .calc-display {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            /* Ajuste para o 0 não ficar cortado */
+            padding: 20px 20px 20px 10px; 
+            font-size: 80px; /* Tamanho fixo para ficar bonito */
+            font-weight: 300;
+            letter-spacing: -2px;
+            overflow: hidden;
+            white-space: nowrap; /* Não quebra linha */
+            line-height: 1; /* Altura da linha ajustada */
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding-bottom: 20px;
+        }
+
+        .calc-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: none;
+            font-size: 32px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.1s;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+        }
+
+        .calc-btn:active { transform: scale(0.95); }
+        
+        .btn-gray-light { background-color: #a5a5a5; color: #000; }
+        .btn-gray-dark { background-color: #333333; }
+        .btn-orange { background-color: #ff9f0a; }
+        
+        .btn-zero {
+            grid-column: span 2;
+            aspect-ratio: auto;
+            border-radius: 50px;
+            justify-content: flex-start;
+            padding-left: 30px;
+        }
+
+        /* --- TELA HS CABEÇA --- */
+        #screen-hs {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .main-button { background: #111; border: 1px solid #333; border-radius: 30px; padding: 20px 30px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(255,255,255,0.05); width: 90%; max-width: 350px; }
+        .main-button:active { transform: scale(0.95); }
+        .icon-box { width: 50px; height: 50px; background: #333; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
+        .icon-box svg { width: 28px; height: 28px; fill: #ffaa00; }
+        .text-box h1 { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
+        .text-box p { font-size: 11px; color: #666; margin-top: 2px; }
+
+        /* --- TELA PATCH --- */
+        #screen-patch {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            padding: 20px 20px 100px 20px;
+            overflow-y: auto;
+        }
+        .back-btn { display: flex; align-items: center; gap: 5px; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; margin-bottom: 10px; padding: 10px 0; width: fit-content; }
+        .back-btn svg { width: 24px; height: 24px; fill: #fff; }
+        .game-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+        .game-btn { flex: 1; padding: 12px; background: #111; border: 1px solid #333; border-radius: 8px; color: #666; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .game-btn.active { background: #ffaa00; color: #000; border-color: #ffaa00; }
+        .patch-header { margin-top: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .patch-header .package-name { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; }
+        .patch-header .package-name svg { width: 20px; height: 20px; fill: #ffaa00; }
+        .patch-info { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #222; font-size: 14px; color: #ccc; }
+        .patch-info .value { color: #fff; font-weight: bold; }
+        .patch-folder-btn { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px; margin: 15px 0; cursor: pointer; }
+        .patch-folder-btn .left { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .patch-folder-btn svg { width: 20px; height: 20px; fill: #ffaa00; }
+        .patch-desc { font-size: 12px; color: #666; line-height: 1.5; margin-bottom: 20px; }
+        .patch-password { display: flex; align-items: center; gap: 10px; background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+        .patch-password svg { width: 20px; height: 20px; fill: #ffaa00; }
+        .patch-password span { font-size: 14px; color: #fff; }
+        .btn-apply { width: 100%; background: #222; border: 1px solid #444; border-radius: 12px; padding: 18px; display: flex; align-items: center; justify-content: space-between; margin-top: 20px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-apply.activated { background: #ff0044; border-color: #ff0044; box-shadow: 0 0 20px rgba(255,0,68,0.4); }
+        .btn-apply .left { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: bold; color: #fff; }
+        .btn-apply svg { width: 24px; height: 24px; fill: #fff; }
+        .btn-apply .arrow { font-size: 20px; color: #fff; }
+
+        /* --- TELA INFO --- */
+        #screen-info {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            padding: 20px 20px 100px 20px;
+            overflow-y: auto;
+        }
+        .info-card { background: #111111; border: 1px solid #333; border-radius: 20px; padding: 20px; margin-top: 40px; display: flex; flex-direction: column; gap: 15px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-label { font-size: 14px; color: #666; }
+        .info-value { font-size: 16px; font-weight: 800; color: #fff; }
+
+        /* --- MENU INFERIOR --- */
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: #0a0a0a; border-top: 1px solid #222; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav.visible { display: flex; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #666; cursor: pointer; transition: 0.3s; font-size: 11px; font-weight: 600; }
+        .nav-item.active { color: #fff; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-item.active svg { fill: #ffaa00; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA 1: CALCULADORA (LOGIN) -->
+    <div id="screen-calc">
+        <div class="calc-display" id="calc-display">0</div>
+        <div class="calc-buttons">
+            <button class="calc-btn btn-gray-light" onclick="calcClear()">AC</button>
+            <button class="calc-btn btn-gray-light" onclick="calcToggleSign()">+/-</button>
+            <button class="calc-btn btn-gray-light" onclick="calcPercent()">%</button>
+            <button class="calc-btn btn-orange" onclick="calcOp('/')">÷</button>
+
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('7')">7</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('8')">8</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('9')">9</button>
+            <button class="calc-btn btn-orange" onclick="calcOp('*')">×</button>
+
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('4')">4</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('5')">5</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('6')">6</button>
+            <button class="calc-btn btn-orange" onclick="calcOp('-')">−</button>
+
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('1')">1</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('2')">2</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('3')">3</button>
+            <button class="calc-btn btn-orange" onclick="calcOp('+')">+</button>
+
+            <button class="calc-btn btn-gray-dark btn-zero" onclick="calcNum('0')">0</button>
+            <button class="calc-btn btn-gray-dark" onclick="calcNum('.')">,</button>
+            <button class="calc-btn btn-orange" onclick="calcResult()">=</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: HS CABEÇA (ACESSO SECRETO) -->
+    <div id="screen-hs">
+        <div class="main-button" onclick="mudarTela('patch')">
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
+            <div class="text-box"><h1>HS Cabeça Thzffx</h1><p>Click to open patch</p></div>
+        </div>
+    </div>
+
+    <!-- TELA 3: PATCH -->
+    <div id="screen-patch">
+        <button class="back-btn" onclick="mudarTela('hs')"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Voltar</button>
+        
+        <div class="game-selector">
+            <button class="game-btn active" id="btnFreefire" onclick="selecionarJogo('freefire')">Freefire</button>
+            <button class="game-btn" id="btnFreefireMax" onclick="selecionarJogo('freefiremax')">Freefire Max</button>
+        </div>
+
+        <div class="patch-header">
+            <div class="package-name"><svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg><span id="package-text">com.dts.freefireth</span></div>
+        </div>
+        <div class="patch-info"><span>Files</span><span class="value">1</span></div>
+        <div class="patch-info"><span>Folders</span><span class="value">6</span></div>
+        <div class="patch-folder-btn" onclick="alert('Abrindo arquivos...')"><div class="left"><svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>Open Patch Files</div><span>&gt;</span></div>
+        <div class="patch-desc">Edit this bundle tree directly. Apply and Export automatically synchronize it into the encrypted .3105 package.</div>
+        <div style="font-size:14px; color:#666; margin-bottom:10px;">Password</div>
+        <div class="patch-password"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg><span>Set permanently</span></div>
+        
+        <div class="btn-apply" id="btnApply" onclick="aplicarPatch()">
+            <div class="left"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Apply Patch</div>
+            <span class="arrow">➔</span>
+        </div>
+        <div style="font-size:11px; color:#444; margin-top:15px; text-align:center;">Before writing, ensure the device is connected and the package is not corrupted.</div>
+    </div>
+
+    <!-- TELA 4: INFO -->
+    <div id="screen-info">
+        <div class="info-card">
+            <div class="info-row"><span class="info-label">Feito por</span><span class="info-value">Thzffx</span></div>
+            <div class="info-row"><span class="info-label">Validade</span><span class="info-value" style="color:#00ff88;">Perm</span></div>
+        </div>
+    </div>
+
+    <!-- MENU INFERIOR -->
+    <div class="bottom-nav" id="bottom-nav">
+        <div class="nav-item" id="nav-home" onclick="fazerLogout()">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span>
+        </div>
+        <div class="nav-item" id="nav-patch" onclick="mudarTela('patch')">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg><span>Patch</span>
+        </div>
+        <div class="nav-item" id="nav-info" onclick="mudarTela('info')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg><span>Info</span>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DA CALCULADORA ---
+        let calcDisplay = document.getElementById('calc-display');
+        let currentInput = '0';
+        let shouldResetDisplay = false;
+        let isLocked = true;
+
+        function updateDisplay() {
+            // Ajusta a fonte se o número for muito grande
+            if (currentInput.length > 9 && currentInput !== 'Erro') {
+                calcDisplay.style.fontSize = '45px';
+            } else {
+                calcDisplay.style.fontSize = '80px'; // Tamanho padrão para o 0 aparecer bem
+            }
+            // Substitui * por x e . por ,
+            calcDisplay.innerText = currentInput.replace(/\*/g, 'x').replace('.', ',');
+        }
+
+        function calcNum(num) {
+            if (currentInput === '0' || shouldResetDisplay) {
+                currentInput = num;
+                shouldResetDisplay = false;
+            } else {
+                currentInput += num;
+            }
+            updateDisplay();
+        }
+
+        function calcOp(op) {
+            // SEGREDO: Se o visor mostrar "0x" e clicar em "-", vira "0x-" e abre o painel
+            if (currentInput === '0*' && op === '-') {
+                currentInput = '0x-';
+                updateDisplay();
+                setTimeout(() => {
+                    unlockPanel();
+                }, 400);
+                return;
+            }
+
+            if (currentInput === '0' || currentInput === 'Erro') {
+                currentInput = '0' + op;
+            } else {
+                currentInput += op;
+            }
+            updateDisplay();
+        }
+
+        function unlockPanel() {
+            isLocked = false;
+            document.getElementById('screen-calc').style.display = 'none';
+            document.getElementById('screen-hs').style.display = 'flex';
+        }
+
+        function calcClear() {
+            currentInput = '0';
+            updateDisplay();
+        }
+
+        function calcToggleSign() {
+            if (currentInput !== '0' && currentInput !== 'Erro') {
+                if (currentInput.startsWith('-')) {
+                    currentInput = currentInput.substring(1);
+                } else {
+                    currentInput = '-' + currentInput;
+                }
+                updateDisplay();
+            }
+        }
+
+        function calcPercent() {
+            if (currentInput !== '0' && currentInput !== 'Erro') {
+                try {
+                    currentInput = String(parseFloat(eval(currentInput)) / 100);
+                    updateDisplay();
+                } catch (e) {
+                    currentInput = 'Erro';
+                    updateDisplay();
+                }
+            }
+        }
+
+        function calcResult() {
+            try {
+                let calcString = currentInput.replace(/x/gi, '*').replace(/,/g, '.');
+                currentInput = String(eval(calcString));
+                updateDisplay();
+                shouldResetDisplay = true;
+            } catch (e) {
+                currentInput = 'Erro';
+                updateDisplay();
+            }
+        }
+
+        // --- NAVEGAÇÃO ---
+        function mudarTela(tela) {
+            document.querySelectorAll('[id^="screen-"]').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('screen-' + tela).style.display = 'flex';
+            
+            if (tela === 'patch' || tela === 'info') {
+                document.getElementById('bottom-nav').classList.add('visible');
+                document.getElementById('nav-' + tela).classList.add('active');
+            } else {
+                document.getElementById('bottom-nav').classList.remove('visible');
+            }
+        }
+
+        function fazerLogout() {
+            document.querySelectorAll('[id^="screen-"]').forEach(t => t.style.display = 'none');
+            document.getElementById('bottom-nav').classList.remove('visible');
+            document.getElementById('screen-calc').style.display = 'flex';
+            currentInput = '0';
+            updateDisplay();
+        }
+
+        // --- LÓGICA DO PATCH ---
+        let isActive = false;
+        let jogoSelecionado = "freefire";
+
+        function selecionarJogo(jogo) {
+            jogoSelecionado = jogo;
+            document.getElementById('btnFreefire').classList.remove('active');
+            document.getElementById('btnFreefireMax').classList.remove('active');
+            if (jogo === 'freefire') { document.getElementById('btnFreefire').classList.add('active'); document.getElementById('package-text').textContent = "com.dts.freefireth"; }
+            else { document.getElementById('btnFreefireMax').classList.add('active'); document.getElementById('package-text').textContent = "com.dts.freefiremax"; }
+        }
+
+        function aplicarPatch() {
+            const btn = document.getElementById('btnApply');
+            if (!isActive) {
+                isActive = true;
+                btn.classList.add('activated');
+                enviarTodosOsCodigos(true);
+                if (jogoSelecionado === 'freefire') window.location.href = "freefire://";
+                else window.location.href = "freefiremax://";
+            } else {
+                isActive = false;
+                btn.classList.remove('activated');
+                enviarTodosOsCodigos(false);
+            }
+        }
+
+        // --- ENVIO DOS CÓDIGOS PARA A API ---
+        async function enviarTodosOsCodigos(ativar) {
+            try {
+                const payload = {
+                    ativar: ativar,
+                    codigos: {
+                        hsCabeca: { dword: 99999999, halfCircle: 0xFFFFFFFF / 2, patch_aimlock: "0x30665456 (790444E3)", patch_headshot: "0x30667008 (1000A0E31EFF2FE1)" },
+                        aimbotCpp80: { TargetSuccessRate: 80, AimSpeed: 0.85, FireDelay: 150, AutoAimSensitivity: 95, MaxAimDistance: 300, TargetZone: "head", Enabled: ativar },
+                        aimbotCpp3D: { WorldToScreen: "Ativado", SetCursorPos: "Ativado", adjustViewAngle: "Ativado", Enabled: ativar },
+                        aimAssist: { dword: 99999999, ativo: ativar },
+                        aimbotLegit: { smooth: 5, jitter: 3, ativo: ativar },
+                        aimRage: { accuracy: 180, range: 360, autoAim: true, recoilControl: true, targetZone: "torso", headshotMultiplier: 250, precisionCore: 190, recoilCancel: 100, ativo: ativar },
+                        aimDrag: { var_sens: 1.0, var_accel: 0.05, var_power: 2, frameTime_ms: 16.6, ativo: ativar },
+                        aimLock: { dword: 99999999, patch: "0x30665456 (790444E3)", ativo: ativar }
+                    }
+                };
+
+                const response = await fetch('http://localhost:3000/api/ativar-todos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                console.log("API Respondeu:", data);
+            } catch (e) { console.log("API offline, mas o botão funcionou visualmente."); }
+        }
+    </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registrado com sucesso!"))
+        .catch((error) => console.error("Erro ao registrar Service Worker:", error));
+    }
+  </script>
+</body>
+</html>
